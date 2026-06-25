@@ -1,0 +1,6 @@
+@SecureGate.API_HostAddress = http://localhost:5150
+
+GET {{SecureGate.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

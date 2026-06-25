@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SecureGate.API/SecureGate.API.csproj" />
+    <Project Path="src/SecureGate.Core/SecureGate.Core.csproj" />
+    <Project Path="src/SecureGate.Infrastructure/SecureGate.Infrastructure.csproj" />
+    <Project Path="src/SecureGate.Tests/SecureGate.Tests.csproj" />
+  </Folder>
+</Solution>
