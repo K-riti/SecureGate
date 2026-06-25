@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # SecureGate API
+  securegate-api:
+    build:
+      context: .
+      dockerfile: src/SecureGate.API/Dockerfile
+    container_name: securegate-api
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=SecureGate;User Id=sa;Password=SecureGate@123;TrustServerCertificate=True
+      - Jwt__Issuer=https://securegate.local
+      - Jwt__Audience=securegate-api
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - securegate-network
+
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: securegate-sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=SecureGate@123
+      - MSSQL_PID=Developer
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "SecureGate@123" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - securegate-network
+
+  # Redis for distributed caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: securegate-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - securegate-network
+
+networks:
+  securegate-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+  redis-data:
