@@ -291,3 +291,5 @@ public class InMemoryAuthorizationCodeStore : IAuthorizationCodeStore
     }
 }
 
+// Make Program accessible for integration tests
+public partial class Program { }

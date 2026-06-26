@@ -1,6 +1,61 @@
-@SecureGate.API_HostAddress = http://localhost:5150
+@baseUrl = http://localhost:5000
+@tenantId = test-tenant
 
-GET {{SecureGate.API_HostAddress}}/weatherforecast/
+### Health Check
+GET {{baseUrl}}/health
 Accept: application/json
+
+###
+
+### OIDC Discovery Document
+GET {{baseUrl}}/.well-known/openid-configuration
+Accept: application/json
+
+###
+
+### Token Introspection (invalid token - returns inactive)
+POST {{baseUrl}}/oauth/introspect
+Content-Type: application/x-www-form-urlencoded
+
+token=invalid-test-token&token_type_hint=access_token
+
+###
+
+### Token Revocation
+POST {{baseUrl}}/oauth/revoke
+Content-Type: application/x-www-form-urlencoded
+
+token=any-token-to-revoke
+
+###
+
+### Token Request - Authorization Code Grant (will fail without valid code)
+POST {{baseUrl}}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+X-Tenant-ID: {{tenantId}}
+
+grant_type=authorization_code&client_id=test-client&code=test-code&code_verifier=test-verifier-that-is-at-least-43-characters-long&redirect_uri=https://localhost/callback
+
+###
+
+### Token Request - Refresh Token Grant (will fail without valid refresh token)
+POST {{baseUrl}}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+X-Tenant-ID: {{tenantId}}
+
+grant_type=refresh_token&refresh_token=your-refresh-token-here&client_id=test-client
+
+###
+
+### Authorization Endpoint (initiates OAuth flow)
+# Open this URL in a browser to start the authorization flow
+GET {{baseUrl}}/oauth/authorize?response_type=code&client_id=test-client&redirect_uri=https://localhost/callback&scope=openid%20profile&state=random-state-value&code_challenge=test-challenge&code_challenge_method=S256
+X-Tenant-ID: {{tenantId}}
+
+###
+
+### User Info Endpoint (requires valid access token)
+GET {{baseUrl}}/oauth/userinfo
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 
 ###
